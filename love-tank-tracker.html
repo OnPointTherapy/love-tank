@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love Tank Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand-primary: #2C2C2A;
+    --brand-accent: #C4956A;
+    --brand-soft: #F7F3EE;
+    --brand-muted: #8C8880;
+    --lang-1: #A78BFA;
+    --lang-2: #34D399;
+    --lang-3: #F472B6;
+    --lang-4: #FBBF24;
+    --lang-5: #60A5FA;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--brand-soft);
+    color: var(--brand-primary);
+    min-height: 100vh;
+  }
+
+  /* ── Branded header ── */
+  .brand-header {
+    background: var(--brand-primary);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .brand-logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand-logo-placeholder {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(196,149,106,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--brand-accent);
+    flex-shrink: 0;
+  }
+  .brand-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: 0.01em;
+  }
+  .brand-tagline {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 1px;
+    letter-spacing: 0.04em;
+  }
+  .brand-header-right {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  /* ── App shell ── */
+  .app {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── Page title ── */
+  .page-title {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .page-title h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--brand-primary);
+    margin-bottom: 6px;
+  }
+  .page-title p {
+    font-size: 14px;
+    color: var(--brand-muted);
+    line-height: 1.6;
+  }
+
+  /* ── Tank ── */
+  .tank-outer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .ovr-pct {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px;
+    color: var(--brand-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .ovr-msg {
+    font-size: 13px;
+    color: var(--brand-muted);
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+  .tank-svg-wrap { width: 180px; height: 290px; }
+  .tank-svg-wrap svg { width: 100%; height: 100%; }
+
+  /* ── Lang cards ── */
+  .lang-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .lcard {
+    background: #fff;
+    border: 1px solid rgba(44,44,42,0.08);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    transition: border-color 0.2s;
+  }
+  .lcard:hover { border-color: rgba(196,149,106,0.35); }
+  .lcard-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .licon { font-size: 18px; display: block; margin-bottom: 4px; }
+  .lname { font-size: 12px; font-weight: 500; color: var(--brand-primary); line-height: 1.35; }
+  .lscore { font-size: 13px; font-weight: 500; }
+  .tiles { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
+  .tile {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 500;
+    transition: transform 0.1s;
+    border: none;
+  }
+  .tile:hover { transform: scale(1.2); }
+  input[type=range] {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 8px;
+    background: #f0ece8;
+  }
+  .lnote {
+    width: 100%;
+    font-size: 11px;
+    border: 1px solid rgba(44,44,42,0.1);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    background: var(--brand-soft);
+    color: var(--brand-primary);
+    resize: none;
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.5;
+  }
+  .lnote::placeholder { color: #b8b4ae; }
+  .lnote:focus { outline: none; border-color: var(--brand-accent); }
+
+  /* ── Summary ── */
+  .sum-card {
+    background: #fff;
+    border: 1px solid rgba(44,44,42,0.08);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .sum-title {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--brand-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 12px;
+  }
+  .sum-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .sum-lbl { font-size: 12px; color: var(--brand-muted); width: 90px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sum-bwrap { flex: 1; height: 6px; background: var(--brand-soft); border-radius: 3px; overflow: hidden; }
+  .sum-bar { height: 100%; border-radius: 3px; transition: width 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  .sum-num { font-size: 12px; font-weight: 500; min-width: 32px; text-align: right; }
+
+  /* ── Prompt ── */
+  .prompt-card {
+    background: var(--brand-primary);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+  .prompt-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brand-accent);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .prompt-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(196,149,106,0.2);
+    color: var(--brand-accent);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .prompt-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    font-style: italic;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 14px;
+  }
+  .prompt-in {
+    width: 100%;
+    font-size: 13px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.07);
+    color: #fff;
+    resize: none;
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.5;
+  }
+  .prompt-in::placeholder { color: rgba(255,255,255,0.3); }
+  .prompt-in:focus { outline: none; border-color: rgba(196,149,106,0.5); }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: 10px; margin-bottom: 24px; }
+  .btn {
+    flex: 1;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(44,44,42,0.2);
+    color: var(--brand-muted);
+  }
+  .btn-ghost:hover { background: rgba(44,44,42,0.04); }
+  .btn-primary {
+    background: var(--brand-accent);
+    border: none;
+    color: #fff;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+
+  /* ── History ── */
+  .section-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: rgba(44,44,42,0.06);
+    border-radius: var(--radius-md);
+    padding: 4px;
+  }
+  .stab {
+    flex: 1;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--brand-muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .stab.active {
+    background: #fff;
+    color: var(--brand-primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .hist-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--brand-muted);
+    font-size: 14px;
+    font-style: italic;
+  }
+  .hist-entry {
+    background: #fff;
+    border: 1px solid rgba(44,44,42,0.08);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .hist-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .hist-date { font-size: 12px; color: var(--brand-muted); }
+  .hist-pct { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--brand-primary); }
+  .hist-bars { display: flex; flex-direction: column; gap: 5px; }
+  .hist-row { display: flex; align-items: center; gap: 8px; }
+  .hist-lbl { font-size: 11px; color: var(--brand-muted); width: 78px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hist-bwrap { flex: 1; height: 5px; background: var(--brand-soft); border-radius: 3px; overflow: hidden; }
+  .hist-bar { height: 100%; border-radius: 3px; }
+  .hist-num { font-size: 11px; color: var(--brand-muted); min-width: 24px; text-align: right; }
+  .hist-note { font-size: 11px; color: var(--brand-muted); margin-top: 8px; font-style: italic; border-top: 1px solid rgba(44,44,42,0.07); padding-top: 8px; }
+  .trend-wrap {
+    background: #fff;
+    border: 1px solid rgba(44,44,42,0.08);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .trend-title { font-size: 11px; font-weight: 500; color: var(--brand-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+
+  /* ── Footer ── */
+  .tool-footer {
+    text-align: center;
+    font-size: 11px;
+    color: #c0bbb5;
+    padding-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     BRANDED HEADER — edit this section
+     Replace "Your Practice Name" with your name
+     Replace the initials in the circle with your own
+     You can also swap the circle for an <img> tag
+     ════════════════════════════════════════ -->
+<header class="brand-header">
+  <div class="brand-logo-area">
+    <div class="brand-logo-placeholder">YP</div>
+    <div>
+      <div class="brand-name">Your Practice Name</div>
+      <div class="brand-tagline">Relationship Coaching</div>
+    </div>
+  </div>
+  <div class="brand-header-right">
+    A tool for your<br>relationship journey
+  </div>
+</header>
+
+<div class="app">
+
+  <div class="section-toggle">
+    <button class="stab active" onclick="showView('track', this)">This week</button>
+    <button class="stab" onclick="showView('history', this)">My history</button>
+  </div>
+
+  <!-- ── TRACK VIEW ── -->
+  <div id="view-track">
+    <div class="page-title">
+      <h1 id="tank-heading">Her love tank</h1>
+      <p>Rate how well you've filled each love language this week.<br>Be honest — this is for you.</p>
+    </div>
+
+    <div class="tank-outer">
+      <div class="ovr-pct" id="ovr-pct">0%</div>
+      <div class="ovr-msg" id="ovr-msg">—</div>
+      <div class="tank-svg-wrap">
+        <svg viewBox="0 0 180 290" xmlns="http://www.w3.org/2000/svg">
+          <defs><clipPath id="tc"><rect x="20" y="32" width="140" height="232" rx="16"/></clipPath></defs>
+          <rect x="20" y="32" width="140" height="232" rx="16" fill="#f0ece8"/>
+          <g id="liqG" clip-path="url(#tc)"></g>
+          <g id="divG"></g>
+          <g id="lblG"></g>
+          <rect x="20" y="32" width="140" height="232" rx="16" fill="none" stroke="rgba(44,44,42,0.15)" stroke-width="1.5"/>
+          <rect x="62" y="13" width="56" height="21" rx="6" fill="#f7f3ee" stroke="rgba(44,44,42,0.12)" stroke-width="1"/>
+          <text x="90" y="27" text-anchor="middle" font-size="10" font-family="DM Sans, sans-serif" fill="#8C8880">love tank</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="lang-grid" id="langGrid"></div>
+    <div class="sum-card" id="sumCard"></div>
+    <div class="prompt-card" id="promptCard"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="resetAll()">Start over</button>
+      <button class="btn btn-primary" onclick="saveWeek()">Save this week</button>
+    </div>
+  </div>
+
+  <!-- ── HISTORY VIEW ── -->
+  <div id="view-history" style="display:none">
+    <div class="page-title">
+      <h1>Your journey</h1>
+      <p>Every saved week tells a story of growth.</p>
+    </div>
+    <div class="trend-wrap" id="trendWrap" style="display:none">
+      <div class="trend-title">Overall trend</div>
+      <canvas id="trendChart" height="90"></canvas>
+    </div>
+    <div id="histList"></div>
+  </div>
+
+  <div class="tool-footer">Built for your relationship journey &nbsp;·&nbsp; <span id="partner-footer"></span></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+const LANGS = [
+  {key:'words',  name:'Words of affirmation', icon:'💬', color:'#A78BFA', accent:'#7C3AED'},
+  {key:'time',   name:'Quality time',          icon:'⏱',  color:'#34D399', accent:'#059669'},
+  {key:'gifts',  name:'Receiving gifts',        icon:'🎁',  color:'#F472B6', accent:'#DB2777'},
+  {key:'service',name:'Acts of service',        icon:'🤝',  color:'#FBBF24', accent:'#D97706'},
+  {key:'touch',  name:'Physical touch',         icon:'🤍',  color:'#60A5FA', accent:'#2563EB'},
+];
+const MSGS = [
+  [0,  19, 'The tank is running dry — let\'s work on this together'],
+  [20, 39, 'A small trickle of love — there\'s real room to grow'],
+  [40, 59, 'Getting warmer — she\'s starting to feel it'],
+  [60, 79, 'Good flow — she knows you care'],
+  [80, 99, 'Tank is looking full — keep going!'],
+  [100,100,'Overflowing — she feels completely loved'],
+];
+const ADAPTIVE = {
+  words: {
+    low: ['When did you last tell her something specific you admire about her?','Try leaving her a voice note today — what would you say?','Name three things she did this week that you genuinely appreciate.'],
+    mid: ['How could your words feel more personal and less routine this week?','What does she most need to hear from you right now?'],
+    high: ['Your words are landing — what makes them feel authentic to her?']
+  },
+  time: {
+    low: ['What would 30 uninterrupted minutes with her look like this week?','When were you last fully present — no phone, no distractions?','What activity does she love that you haven\'t done together recently?'],
+    mid: ['How do you ensure your time together feels meaningful, not just shared space?','What would make your next moment together feel intentional?'],
+    high: ['Quality time is strong — how do you protect it when life gets busy?']
+  },
+  gifts: {
+    low: ['A gift doesn\'t have to cost anything — what would surprise her this week?','What\'s something she\'s mentioned wanting that you\'ve put off?','When did you last pick something up just because you thought of her?'],
+    mid: ['Are your gifts thoughtful or habitual? What would feel truly seen to her?','What gift would show her you\'ve been paying close attention lately?'],
+    high: ['Gifts are flowing — what makes a gift feel meaningful rather than obligatory to her?']
+  },
+  service: {
+    low: ['What task has she been carrying alone that you could take on today?','Which of her stressors could you quietly solve without being asked?','What does "I\'ve got this" look like for her this week?'],
+    mid: ['Are your acts of service things she actually values, or things you assume she needs?','How do you notice when she needs support before she asks?'],
+    high: ['Service is strong — how do you ensure it feels like love, not just logistics?']
+  },
+  touch: {
+    low: ['When did you last initiate a non-sexual touch — a hug, a hand-hold?','Physical touch can be small: a hand on her back while she talks. Try it today.','What does she do when she needs physical reassurance? Have you noticed?'],
+    mid: ['Is your physical affection consistent, or does it spike and drop?','How does she respond to different kinds of touch — have you asked her recently?'],
+    high: ['Physical connection is strong — how do you keep it warm rather than habitual?']
+  }
+};
+const GENERAL = ['What pattern do you notice in how you show love versus what she receives?','If she filled this in herself, what do you think she\'d score differently?','Which love language comes most naturally to you — and which feels like effort?','What does a "full tank" look like to her, in her own words?'];
+
+let scores = {words:0,time:0,gifts:0,service:0,touch:0};
+let notes  = {words:'',time:'',gifts:'',service:'',touch:''};
+let history = JSON.parse(localStorage.getItem('lt_history')||'[]');
+let partnerName = localStorage.getItem('lt_partner')||'';
+let trendChart = null;
+
+function getMsg(p){for(const[lo,hi,m]of MSGS)if(p>=lo&&p<=hi)return m;return '';}
+function overallPct(){const t=LANGS.reduce((s,l)=>s+(scores[l.key]||0),0);return Math.round(t/(LANGS.length*10)*100);}
+
+function updateTank(){
+  const pct=overallPct();
+  document.getElementById('ovr-pct').textContent=pct+'%';
+  document.getElementById('ovr-msg').textContent=getMsg(pct);
+  const liq=document.getElementById('liqG'),div=document.getElementById('divG'),lbl=document.getElementById('lblG');
+  liq.innerHTML='';div.innerHTML='';lbl.innerHTML='';
+  if(pct===0)return;
+  const tankH=232,botY=264,filled=tankH*pct/100;
+  let curY=botY;
+  LANGS.forEach((lang,i)=>{
+    const h=Math.round(Math.max(0,scores[lang.key])/(LANGS.length*10)*filled);
+    if(h<=0)return;
+    const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('x','20');r.setAttribute('y',String(curY-h));r.setAttribute('width','140');r.setAttribute('height',String(h));r.setAttribute('fill',lang.color);r.setAttribute('opacity','0.85');
+    liq.appendChild(r);
+    if(i<LANGS.length-1){const d=document.createElementNS('http://www.w3.org/2000/svg','line');d.setAttribute('x1','20');d.setAttribute('x2','160');d.setAttribute('y1',String(curY-h));d.setAttribute('y2',String(curY-h));d.setAttribute('stroke','#f7f3ee');d.setAttribute('stroke-width','1.5');d.setAttribute('opacity','0.6');div.appendChild(d);}
+    if(h>14){const tx=document.createElementNS('http://www.w3.org/2000/svg','text');tx.setAttribute('x','90');tx.setAttribute('y',String(curY-h/2+4));tx.setAttribute('text-anchor','middle');tx.setAttribute('font-size','11');tx.setAttribute('font-family','DM Sans, sans-serif');tx.setAttribute('fill','white');tx.setAttribute('font-weight','500');tx.textContent=lang.icon+' '+scores[lang.key]+'/10';lbl.appendChild(tx);}
+    curY-=h;
+  });
+}
+
+function buildCards(){
+  const grid=document.getElementById('langGrid');grid.innerHTML='';
+  LANGS.forEach(lang=>{
+    const card=document.createElement('div');card.className='lcard';
+    let tiles='<div class="tiles">';
+    for(let s=1;s<=10;s++){const f=s<=scores[lang.key];tiles+=`<button class="tile" onclick="setStar('${lang.key}',${s})" style="background:${f?lang.color:'#f0ece8'};color:${f?'white':'#b8b4ae'}">${s}</button>`;}
+    tiles+='</div>';
+    card.innerHTML=`<span class="licon">${lang.icon}</span><div class="lcard-top"><span class="lname">${lang.name}</span><span class="lscore" style="color:${lang.accent}">${scores[lang.key]}/10</span></div>${tiles}<input type="range" min="0" max="10" step="1" value="${scores[lang.key]}" style="accent-color:${lang.accent}" oninput="setScore('${lang.key}',this.value)"><textarea class="lnote" rows="2" placeholder="What did you do? What could you do more?" oninput="setNote('${lang.key}',this.value)">${notes[lang.key]}</textarea>`;
+    grid.appendChild(card);
+  });
+}
+
+function buildSummary(){
+  const el=document.getElementById('sumCard');
+  let h='<div class="sum-title">This week at a glance</div>';
+  LANGS.forEach(l=>{const p=Math.round(scores[l.key]/10*100);h+=`<div class="sum-row"><span class="sum-lbl">${l.icon} ${l.name.split(' ')[0]}</span><div class="sum-bwrap"><div class="sum-bar" style="width:${p}%;background:${l.color}"></div></div><span class="sum-num" style="color:${l.accent}">${scores[l.key]}/10</span></div>`;});
+  el.innerHTML=h;
+}
+
+function buildPrompt(){
+  const allZero=LANGS.every(l=>scores[l.key]===0);
+  let prompt,tag;
+  if(allZero){prompt=GENERAL[Math.floor(Math.random()*GENERAL.length)];tag='Where to begin';}
+  else{
+    const sorted=[...LANGS].sort((a,b)=>scores[a.key]-scores[b.key]);
+    const low=sorted[0];const sc=scores[low.key];
+    const pool=sc<=3?ADAPTIVE[low.key].low:sc<=6?ADAPTIVE[low.key].mid:ADAPTIVE[low.key].high;
+    prompt=pool[Math.floor(Math.random()*pool.length)];
+    tag=sc<=3?'Needs most attention: '+low.name:sc<=6?'Focus area: '+low.name:'Doing well — keep it up';
+  }
+  document.getElementById('promptCard').innerHTML=`<div class="prompt-eyebrow">Reflection prompt</div><span class="prompt-tag">${tag}</span><div class="prompt-text">${prompt}</div><textarea class="prompt-in" rows="2" id="intentIn" placeholder="Write your intention or reflection here..."></textarea>`;
+}
+
+function setStar(key,val){scores[key]=val;buildCards();updateTank();buildSummary();buildPrompt();}
+function setScore(key,val){scores[key]=parseInt(val);buildCards();updateTank();buildSummary();buildPrompt();}
+function setNote(key,val){notes[key]=val;}
+
+function resetAll(){
+  LANGS.forEach(l=>{scores[l.key]=0;notes[l.key]='';});
+  buildCards();updateTank();buildSummary();buildPrompt();
+}
+
+function saveWeek(){
+  const intentEl=document.getElementById('intentIn');
+  const intention=intentEl?intentEl.value.trim():'';
+  const pct=overallPct();
+  const entry={date:new Date().toLocaleDateString('en-NZ',{day:'numeric',month:'short',year:'numeric'}),pct,scores:Object.assign({},scores),notes:Object.assign({},notes),intention};
+  history.unshift(entry);
+  localStorage.setItem('lt_history',JSON.stringify(history.slice(0,52)));
+  const saved=document.createElement('div');
+  saved.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2C2C2A;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-family:DM Sans,sans-serif;z-index:999;opacity:1;transition:opacity 0.4s';
+  saved.textContent='Week saved! View it in "My history"';
+  document.body.appendChild(saved);
+  setTimeout(()=>{saved.style.opacity='0';setTimeout(()=>saved.remove(),400);},2500);
+}
+
+function showView(v, btn){
+  document.getElementById('view-track').style.display=v==='track'?'block':'none';
+  document.getElementById('view-history').style.display=v==='history'?'block':'none';
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(v==='history')renderHistory();
+}
+
+function renderHistory(){
+  const tw=document.getElementById('trendWrap');
+  const list=document.getElementById('histList');
+  if(history.length===0){list.innerHTML='<div class="hist-empty">No check-ins saved yet.<br>Complete a week and tap "Save this week" to get started.</div>';tw.style.display='none';return;}
+  tw.style.display='block';
+  renderTrend();
+  list.innerHTML='';
+  history.forEach(e=>{
+    const div=document.createElement('div');div.className='hist-entry';
+    let bars='<div class="hist-bars">';
+    LANGS.forEach(l=>{const s=e.scores[l.key]||0;const p=Math.round(s/10*100);bars+=`<div class="hist-row"><span class="hist-lbl">${l.icon} ${l.name.split(' ')[0]}</span><div class="hist-bwrap"><div class="hist-bar" style="width:${p}%;background:${l.color}"></div></div><span class="hist-num">${s}/10</span></div>`;});
+    bars+='</div>';
+    div.innerHTML=`<div class="hist-top"><span class="hist-date">${e.date}</span><span class="hist-pct">${e.pct}%</span></div>${bars}${e.intention?`<div class="hist-note">My intention: ${e.intention}</div>`:''}`;
+    list.appendChild(div);
+  });
+}
+
+function renderTrend(){
+  const canvas=document.getElementById('trendChart');
+  const labels=history.map(e=>e.date).reverse();
+  const data=history.map(e=>e.pct).reverse();
+  if(trendChart)trendChart.destroy();
+  trendChart=new Chart(canvas,{type:'line',data:{labels,datasets:[{data,borderColor:'#C4956A',backgroundColor:'rgba(196,149,106,0.08)',borderWidth:2,pointBackgroundColor:'#C4956A',pointRadius:4,tension:0.35,fill:true}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:11},color:'#8C8880'},grid:{color:'rgba(44,44,42,0.06)'}},x:{ticks:{font:{size:10},color:'#8C8880'},grid:{display:false}}}}});
+}
+
+buildCards();updateTank();buildSummary();buildPrompt();
+if(partnerName){document.getElementById('tank-heading').textContent=partnerName+"'s love tank";document.getElementById('partner-footer').textContent='Tracking for '+partnerName;}
+</script>
+</body>
+</html>
